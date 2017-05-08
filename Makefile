@@ -1,8 +1,8 @@
 # Set your variables here
 #
 ## START
-executable= # Name of the executable to generate
 main_file= # Name of the main file of this project
+executable= # Name of the executable to generate
 additional_files_and_dirs=Makefile requirements.txt # List the required files and directories here
 deployment_host= # Name of the host to deploy to. Can be an IP address.
 python_version=2 # Version of python to use.
