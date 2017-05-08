@@ -44,7 +44,13 @@ distribute: $(main_file) $(additional_files_and_dirs)
 
 deploy: distribute
 	@ssh $(deployment_host) -- 'make'
-	@echo "> Running $(executable)"
+
+run: deploy
+	@echo "> Running $(executable) (one shot)"
+	@ssh $(deployment_host) -- './$(executable)'
+
+start: deploy
+	@echo "> Starting $(executable) (long run)"
 	@ssh $(deployment_host) -- 'pkill $(executable); >/dev/null 2>&1 </dev/null nohup ./$(executable) &'
 
 clean:
@@ -54,4 +60,4 @@ checkdeps:
 	@echo "Checking dependencies"
 	@sh -e -c 'for dep in $(deps);do echo -n "> "; command -v $$dep || { echo "command '"'"'$$dep'"'"' not found. Please install it." && false; }; done'
 
-.PHONY: clean checkdeps distribute
+.PHONY: checkdeps clean deploy distribute run start
