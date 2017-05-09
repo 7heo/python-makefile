@@ -16,7 +16,7 @@ host_dir=$(strip $(remote_dir))
 
 deps=curl sed sort cat xargs tar pwd chmod
 
-all: checkdeps $(executable)
+all: checkvars checkdeps $(executable)
 
 .virtualenv.tool.version:
 	@echo "> Retrieving the version of the latest virtualenv from github..."
@@ -46,6 +46,7 @@ $(executable): $(main_file) virtual.env/bin/python vendored
 	@chmod a+x $@
 
 distribute: $(main_file) $(additional_files_and_dirs)
+	@test -n "$(host)" || { echo "Error: deployment_host undefined" >&2; exit 1; }
 	@scp -r $^ $(host):$(host_dir)
 
 deploy: distribute
@@ -66,4 +67,8 @@ checkdeps:
 	@echo "Checking dependencies"
 	@sh -e -c 'for dep in $(deps);do echo -n "> "; command -v $$dep || { echo "command '"'"'$$dep'"'"' not found. Please install it." && false; }; done'
 
-.PHONY: checkdeps clean deploy distribute run start
+checkvars:
+	@test -n "$(main_file)" || { echo "Error: main_file undefined" >&2; exit 1; }
+	@test -n "$(executable)" || { echo "Error: executable undefined" >&2; exit 1; }
+
+.PHONY: checkdeps checkvars clean deploy distribute run start
