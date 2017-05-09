@@ -54,7 +54,7 @@ distribute: $(main_file) $(additional_files_and_dirs)
 	@scp -r $^ $(host):$(host_dir)
 
 deploy: distribute
-	@ssh $(host) -- 'cd $(host_dir); make'
+	@ssh $(host) -- 'mkdir -p "$(host_dir)"; cd $(host_dir); make'
 
 run: deploy
 	@echo "> Running $(exec_wrapper) (one shot)"
