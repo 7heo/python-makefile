@@ -5,8 +5,14 @@ main_file= # Name of the main file of this project
 executable= # Name of the executable to generate
 additional_files_and_dirs=Makefile requirements.txt # List the required files and directories here
 deployment_host= # Name of the host to deploy to. Can be an IP address.
+remote_dir= # Name of the directory to deploy to on the deployment host.
 python_version=2 # Version of python to use.
 ## END
+ifeq ($(remote_dir), )
+  remote_dir=.
+endif
+host=$(strip $(deployment_host))
+host_dir=$(strip $(remote_dir))
 
 deps=curl sed sort cat xargs tar pwd chmod
 
@@ -40,18 +46,18 @@ $(executable): $(main_file) virtual.env/bin/python vendored
 	@chmod a+x $@
 
 distribute: $(main_file) $(additional_files_and_dirs)
-	@scp -r $^ $(strip $(deployment_host)):
+	@scp -r $^ $(host):$(host_dir)
 
 deploy: distribute
-	@ssh $(deployment_host) -- 'make'
+	@ssh $(host) -- 'cd $(host_dir); make'
 
 run: deploy
 	@echo "> Running $(executable) (one shot)"
-	@ssh $(deployment_host) -- './$(executable)'
+	@ssh $(host) -- '$(host_dir)/$(executable)'
 
 start: deploy
 	@echo "> Starting $(executable) (long run)"
-	@ssh $(deployment_host) -- 'pkill $(executable); >/dev/null 2>&1 </dev/null nohup ./$(executable) &'
+	@ssh $(host) -- 'pkill $(executable); >/dev/null 2>&1 </dev/null nohup $(host_dir)/$(executable) &'
 
 clean:
 	rm -rf *.pyc .virtualenv.tool.version virtualenv.tool virtual.env vendored $(executable)
